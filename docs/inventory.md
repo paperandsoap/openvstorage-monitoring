@@ -64,22 +64,33 @@ sw02 ansible_host=<ip>
 ```
 
 **operation** group: Define the deployment node of your setup. min 0, max infinity.
+
 **check_mk_master** group: Define the master check mk node. min 0, max 1 node.
+
 **check_mk_slaves** group: Define the slaves check mk nodes. min 0, max infinity.
+
 **monitoring** group: Parent group from the check mk nodes.
+
 **redis** group: Define the redis node(s). Redis-ha with sentinel is not implemented. min 1, max infinity.
+
 **grafana** group: Define the grafana node. min 0, max infinity.
+
 **elk** group: Define the elk stack. min 0, max infinity. Elk stack cluster not implemented.
 
 ## Hyperscale settings
 **controllers** group: Define the ovs controllers. min 3, max 3.
+
 **computenodes** group: Define the ovs compute nodes. min 0, max infinity.
+
 **storagenodes** group: Define the ovs storage nodes. min 1, max infinity.
 
 ## Hyperscale with accelerated backend settings
 **controllers** group: Define the ovs controllers. min 3, max 3.
+
 **computenodes** group: Define the ovs compute nodes. min 0, max infinity.
+
 **storagenodes** group: Define the ovs storage nodes. min 1, max infinity.
+
 **volumedrivernodes** group: Define the volumedriver nodes. min 1, max infinity.
 
 ## Hyperconverged settings

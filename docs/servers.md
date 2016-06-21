@@ -1,8 +1,11 @@
 # *_servers.yml
 
 Each \*_servers.yml contains the hosts, remote_user and roles variables.
+
 **hosts** variable is the host group(s) where this playbook will be used for.
+
 **remote_user** is the remote user who will run all the tasks from the playbook.
+
 **roles** each group have their own roles.
 
 For example compute_servers.yml. This playbook is used by the computenodes.

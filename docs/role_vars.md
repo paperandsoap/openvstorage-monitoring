@@ -14,7 +14,9 @@ protocol: "https"
 port: "443"
 ```
 
-You can choose 2 transport layers for Statsmonkey: redis or influxdb. If you want to configure with redis your statsmonkey/vars/main.yml will look like:
+You can choose 2 transport layers for Statsmonkey: Redis or InfluxDB.
+
+If you want to configure with Redis your statsmonkey/vars/main.yml will look like:
 
 ```
 ---
@@ -28,7 +30,7 @@ password: <redis_password>
 plugins: /etc/statsmonkey/plugins
 ```
 
-For influxdb:
+For InfluxDB:
 
 ```
 ---
