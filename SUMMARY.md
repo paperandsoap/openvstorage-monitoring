@@ -1,5 +1,17 @@
 # Summary
 
 * [How to deploy the ovs monitor with Ansible](docs/deploy_with_ansible.md)
+    * [Introduction](docs/introduction.md)
+    * [Components](docs/components.md)
+    * [Ansible structure](docs/ansible_structure.md)
+        * [Inventory](docs/inventory.md)
+        * [Host_vars](docs/host_vars.md)
+        * [Group_vars](docs/group_vars.md)
+        * [Setup.yml](docs/setup.md)
+        * [\*\_servers.yml](docs/servers.md)
+        * [Roles](docs/roles.md)
+            * [Vars](docs/role_vars.md)
+    * [Ansible commands](docs/ansible_commands.md)
+    * [What if you have 1 node for multiple roles?](docs/multi_roles.md)
 * [Statistics](docs/statistics.md)
 * [Logs](docs/logs.md)
