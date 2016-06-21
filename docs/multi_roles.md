@@ -1,6 +1,7 @@
 # What if you have 1 node for multiple roles?
 
 Suppose you want to install redis, check_mk master, elk stack and grafana on one operation node.
+
 An example will clarify:
 
 inventory:

@@ -38,8 +38,13 @@ grafana
 ```
 
 **defaults** are default variables.
+
 **files** are files that will be copied to the node.
+
 **handlers** are actions that are triggered by the playbook. (e.g.: restarting services)
+
 **tasks** are commands that are executed in order.
+
 **templates** are processed by the Jinja2 templating language. (variables from the defaults or vars directory will be used)
+
 **vars** are variables that you need to change.
