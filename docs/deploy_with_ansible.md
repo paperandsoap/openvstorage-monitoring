@@ -2,8 +2,8 @@
 
 ## TOC
 * [Components](#components)
-* [Ansible structure](#ansible_structure)
-* [Ansible commands](#ansible_commands)
+* [Ansible structure](#ansible-structure)
+* [Ansible commands](#ansible-commands)
 * [What if you have 1 node for multiple roles?](#multi_roles)
 
 
