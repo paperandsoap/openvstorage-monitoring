@@ -1,0 +1,13 @@
+filter {
+  if [type] == "redis" {
+    grok {
+      patterns_dir => "/etc/logstash/patterns"
+      match => { "message" => "\[%{PIDTHREAD:pid_thread}\] %{REDISTIMESTAMP:date} %{GREEDYDATA:log_message}" }
+      add_field => [ "program", "redis" ]
+    }
+    date {
+      match => ["date", "dd MMM HH:mm:ss.SSS"]
+      target => "date"
+    }
+  }
+}

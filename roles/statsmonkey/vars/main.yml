@@ -1,0 +1,16 @@
+---
+# file: roles/statsmonkey/vars/main.yml
+
+transport: influxdb
+host: <host>
+port: 8086
+database: <db_name>
+user: <influxdb_username>
+password: <influxdb_password>
+#example redis
+#transport: redis
+#host: <host>
+#port: 6379
+#database: <db_name>
+#password: <redis_password>
+plugins: /etc/statsmonkey/plugins

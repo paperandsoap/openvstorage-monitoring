@@ -1,0 +1,30 @@
+---
+# file: roles/health_check/tasks/main.yml
+
+- name: Install python-pip
+  apt: name=python-pip state=latest update_cache=yes
+  tags: health_check
+
+- name: Install pip packages
+  pip: name={{ item }} state=latest
+  with_items:
+    - flower
+    - psutil
+    - xmltodict
+    - timeout-decorator
+  tags: health_check
+
+- name: Clone health check git repo
+  git:
+    repo=https://github.com/openvstorage/openvstorage-health-check.git
+    dest={{ directory }}
+    version=ovs-impl
+  tags: health_check
+
+- name: Copy health_check into OpenvStorage
+  shell: cp {{ directory }}/* /opt/OpenvStorage -R
+  tags: health_check
+
+- name: Copy health_check commands
+  shell: cp {{ directory }}/scripts/system/ovs /usr/bin/ovs; chmod 755 /usr/bin/ovs
+  tags: health_check

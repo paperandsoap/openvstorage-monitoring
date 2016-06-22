@@ -1,0 +1,4 @@
+---
+# file: group_vars/switch
+
+beaver_conf: beaver_switch.conf.j2

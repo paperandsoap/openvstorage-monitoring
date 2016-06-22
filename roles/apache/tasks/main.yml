@@ -1,0 +1,23 @@
+---
+# file: roles/apache/tasks/main.yml
+
+- name: Install apache apt packages
+  apt: name=apache2 state=latest update_cache=true force=yes
+  tags: apache
+
+- name: Create mon-tools directory
+  file: path=/etc/apache2/mon-tools state=directory mode=0755
+
+- name: enable proxy modules
+  apache2_module: name={{ item }} state=present
+  with_items:
+     - proxy
+     - proxy_http
+
+- name: Copy default apache site config
+  copy:
+     src=000-default.conf
+     dest=/etc/apache2/sites-available
+     owner=root
+     group=root
+     mode=644

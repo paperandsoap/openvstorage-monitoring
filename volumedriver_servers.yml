@@ -1,0 +1,11 @@
+---
+# file: volumedriver_servers.yml
+
+- hosts: volumedrivernodes
+  remote_user: root
+  roles:
+    - common
+    - beaver
+    - check_mk_agent
+    - health_check
+    - statsmonkey

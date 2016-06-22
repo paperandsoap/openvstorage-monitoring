@@ -1,0 +1,37 @@
+[statsmonkey]
+{% if transport is defined %}
+transport: {{ transport }}
+{% else %}
+transport: influxdb
+{% endif %}
+{% if host is defined %}
+host: {{ host }}
+{% else %}
+host: 127.0.0.1
+{% endif %}
+{% if port is defined %}
+port: {{ port }}
+{% else %}
+port: 8086
+{% endif %}
+{% if statsmonkey_group is defined %}
+group: {{ statsmonkey_group }}
+{% else %}
+group: no_group
+{% endif %}
+{% if database is defined %}
+database: {{ database }}
+{% else %}
+database: test
+{% endif %}
+{% if user is defined %}
+user: {{ user }}
+{% endif %}
+{% if password is defined %}
+password: {{ password }}
+{% endif %}
+{% if plugins is defined %}
+plugins: {{ plugins }}
+{% else %}
+plugins: /etc/statsmonkey/plugins
+{% endif %}

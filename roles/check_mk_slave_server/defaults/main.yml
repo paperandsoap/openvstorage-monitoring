@@ -1,0 +1,5 @@
+---
+# file: roles/check_mk_slave_server/defaults/main.yml
+
+url: "http://files.omdistro.org/releases/debian_ubuntu/omd-1.20.trusty.amd64.deb"
+omd_version: "omd-1.20"

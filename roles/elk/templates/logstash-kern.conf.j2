@@ -1,0 +1,12 @@
+filter {
+  if [type] == "kern" {
+    grok {
+      patterns_dir => "/etc/logstash/patterns"
+      match => { "message" => "%{SYSLOGTIMESTAMP:date} %{SYSLOGHOST:hostname} %{WORD:program}(?:\[%{POSINT:pid_thread}\])?: %{GREEDYDATA:log_message}" }
+    }
+    date {
+      match => [ "date", "MMM  d HH:mm:ss", "MMM dd HH:mm:ss" ]
+      target => "date"
+    }
+  }
+}

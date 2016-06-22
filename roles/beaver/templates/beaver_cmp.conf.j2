@@ -1,0 +1,45 @@
+[beaver]
+transport: redis
+{% if redis_url is defined %}
+redis_url: {{ redis_url }}
+{% else %}
+redis_url: redis://127.0.0.1:6379
+{% endif %}
+redis_namespace: logs
+logstash_version: 1
+
+[/var/log/rabbitmq/*.log]
+multiline_regex_before = ^[^=].*
+ignore_empty: 1
+type: rabbitmq
+
+[/var/log/ovs/*.log]
+multiline_regex_before = ^[^\d{4}\-\d{2}\-\d{1,2}].*
+ignore_empty: 1
+type: ovs
+
+[/var/log/ovs/volumedriver/*.log]
+multiline_regex_before = ^[^\d{4}\-\d{2}\-\d{1,2}].*
+ignore_empty: 1
+type: ovs
+
+[/var/log/upstart/*.log]
+multiline_regex_before = ^[^\d{4}\-\d{2}\-\d{1,2}].*
+ignore_empty: 1
+exclude: (avahi-cups-reload|avahi-daemon|systemd-logind|ovs-etcd-config|ovs-snmp|procps)
+type: ovs
+
+[/var/log/kern.log]
+type: kern
+
+[/var/log/syslog]
+type: syslog
+
+[/var/log/auth.log]
+type: auth
+
+[/var/log/libvirt/*.log]
+type: libvirtd
+
+[/var/log/nginx/error.log]
+type: other

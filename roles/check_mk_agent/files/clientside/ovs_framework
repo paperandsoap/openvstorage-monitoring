@@ -1,0 +1,39 @@
+#!/usr/bin/python
+
+import sys
+import os
+import time
+import timeout_decorator
+
+sys.path.append('/opt/OpenvStorage')
+from ovs.dal.lists.vdisklist import VDiskList
+from timeout_decorator.timeout_decorator import TimeoutError
+
+os.environ["OVS_LOGTYPE_OVERRIDE"] = 'file'
+print '<<<ovs_framework>>>'
+
+
+@timeout_decorator.timeout(10)
+def print_dtl_status():
+
+    start_script = time.time()
+    try:
+        vdisks = VDiskList.get_vdisks()
+        failover_modes = {
+            'OK_STANDALONE': 0,
+            'OK_SYNC': 0,
+            'CATCHUP': 0,
+            'DEGRADED': 0
+        }
+        for vdisk in vdisks:
+            vdisk_dtl = vdisk.info['failover_mode']
+            if vdisk_dtl not in failover_modes:
+                failover_modes[vdisk_dtl] = 0
+            failover_modes[vdisk_dtl] += 1
+
+        print "dtl_status", failover_modes['OK_STANDALONE'], failover_modes['OK_SYNC'], failover_modes['CATCHUP'], failover_modes['DEGRADED'], (time.time() - start_script)
+    except TimeoutError:
+        print "dtl_status", -100, -100, -100, -100, (time.time() - start_script)
+
+if __name__ == '__main__':
+    print_dtl_status()

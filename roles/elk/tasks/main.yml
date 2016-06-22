@@ -1,0 +1,28 @@
+---
+# file: roles/elk/tasks/main.yml
+
+- name: Install common apt packages
+  apt: name={{ item }} state=latest update_cache=true force=yes
+  with_items: "{{ elk_common_packages }}"
+  tags: elk
+
+- name: Install Java
+  include: java.yml
+  tags: elk
+
+- name: ES apt GPG key
+  apt_key:
+    url='http://packages.elastic.co/GPG-KEY-elasticsearch'
+  tags: elk
+
+- name: Install Elasticsearch
+  include: elasticsearch.yml
+  tags: elk
+
+- name: Install Logstash
+  include: logstash.yml
+  tags: elk
+
+- name: Install Kibana
+  include: kibana.yml
+  tags: elk

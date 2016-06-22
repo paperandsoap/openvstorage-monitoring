@@ -1,0 +1,8 @@
+##############################################################################
+## Services
+##############################################################################
+check process snmpd with pidfile /var/run/snmpd.pid
+    every 6 cycles
+    group networking
+    start program = "/etc/init.d/snmpd start"
+    stop program = "/etc/init.d/snmpd stop"

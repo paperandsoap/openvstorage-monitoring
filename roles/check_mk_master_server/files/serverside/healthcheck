@@ -1,0 +1,27 @@
+def inventory_healthcheck(info):
+    inventory = []
+    for line in info:
+        check = line[0]
+        status = line[1]
+        inventory.append((check, None))
+    return inventory
+
+def check_healthcheck(item,params,info):
+    for line in info:
+        check = line[0]
+        status = line[1]
+        if check == item:
+            if status.upper() == 'FAILURE' or status.upper() == 'EXCEPTION':
+                return 2, "%s %s" %(check, status)
+            elif status.upper() == 'WARNING':
+                return 1, "%s %s" %(check, status)
+            elif status.upper() == 'SUCCESS':
+                return 0, "%s %s" %(check, status)
+            else:
+                return 3, "%s %s" %(check, status)
+
+check_info["healthcheck"] = {
+    'check_function':           check_healthcheck,
+    'inventory_function':       inventory_healthcheck,
+    'service_description':      '%s',
+}

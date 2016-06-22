@@ -1,0 +1,11 @@
+---
+# file: redis_servers.yml
+
+- hosts: redis
+  remote_user: root
+  roles:
+    - common
+    - beaver
+    - redis
+    - check_mk_agent
+    - statsmonkey

@@ -1,0 +1,11 @@
+---
+# file: controller_servers.yml
+
+- hosts: controllers
+  remote_user: root
+  roles:
+    - common
+    - beaver
+    - check_mk_agent
+    - health_check
+    - statsmonkey

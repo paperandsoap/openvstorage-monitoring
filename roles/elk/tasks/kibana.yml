@@ -1,0 +1,27 @@
+---
+# file: roles/elk/tasks/kibana.yml
+
+- name: Kibana apt repo
+  apt_repository:
+    repo="deb http://packages.elastic.co/kibana/{{ elk_kibana.version }}/debian stable main"
+    update_cache=yes
+  when: ansible_os_family == 'Debian'
+
+- name: Install Kibana apt packages
+  apt: name=kibana update_cache=yes state=latest
+  when: ansible_os_family == 'Debian'
+  notify: Restart kibana
+
+- name: Import logrotate
+  copy:
+     src=kibana-logrotate
+     dest=/etc/logrotate.d/kibana
+     owner=root
+     group=root
+     mode=0644
+
+- name: Copy Apache config file
+  template:
+     src=010_kibana.j2
+     dest=/etc/apache2/mon-tools/010_kibana
+  notify: Reload apache2

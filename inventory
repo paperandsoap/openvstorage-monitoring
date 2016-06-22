@@ -1,0 +1,54 @@
+# file: inventory
+
+[operation]
+ops01 ansible_host=<ip>
+
+[check_mk_master]
+mon01 ansible_host=<ip>
+
+[check_mk_slaves]
+mon02 ansible_host=<ip>
+
+[monitoring:children]
+check_mk_master
+check_mk_slaves
+
+[redis]
+red01 ansible_host=<ip>
+
+[grafana]
+gra01 ansible_host=<ip>
+
+[elk]
+elk01 ansible_host=<ip>
+
+# hyperscale environment
+[controllers]
+ctl01 ansible_host=<ip>
+ctl02 ansible_host=<ip>
+ctl03 ansible_host=<ip>
+
+[computenodes]
+cmp01 ansible_host=<ip>
+cmp02 ansible_host=<ip>
+
+[storagenodes]
+str01 ansible_host=<ip>
+str02 ansible_host=<ip>
+str03 ansible_host=<ip>
+str04 ansible_host=<ip>
+
+# only used when you have an accelerated backend
+[volumedrivernodes]
+perf01 ansible_host=<ip>
+
+# hyperconverged environment
+[hyperconverged]
+node01 ansible_host=<ip>
+node02 ansible_host=<ip>
+node03 ansible_host=<ip>
+
+# cumulus switches
+[switch]
+sw01 ansible_host=<ip>
+sw02 ansible_host=<ip>

@@ -1,0 +1,21 @@
+[beaver]
+transport: redis
+{% if redis_url is defined %}
+redis_url: {{ redis_url }}
+{% else %}
+redis_url: redis://127.0.0.1:6379
+{% endif %}
+redis_namespace: logs
+logstash_version: 1
+
+[/var/log/kern.log]
+type: kern
+
+[/var/log/syslog]
+type: syslog
+
+[/var/log/auth.log]
+type: auth
+
+[/var/log/libvirt/*.log]
+type: libvirtd

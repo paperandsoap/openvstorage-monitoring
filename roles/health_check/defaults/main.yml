@@ -1,0 +1,4 @@
+---
+# file: roles/health_check/defaults/main.yml
+
+directory: /opt/OpenvStorage-healthcheck

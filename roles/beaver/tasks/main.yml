@@ -1,0 +1,33 @@
+---
+# file: roles/beaver/tasks/main.yml
+
+- name: Install python-pip
+  apt: name=python-pip state=latest update_cache=yes
+  tags: beaver
+
+- name: Install pip packages
+  pip: name={{ item }} state=latest
+  register: package_file
+  with_items:
+     - beaver
+     - redis
+  tags: beaver
+
+- name: Copy init script
+  copy: src=beaver.daemon dest=/etc/init.d/beaver owner=root group=root mode=755
+  tags: beaver
+
+- name: Create /etc/beaver
+  file: path=/etc/beaver state=directory
+  tags: beaver
+
+- name: Copy beaver config
+  template:
+     src={{ beaver_conf }}
+     dest=/etc/beaver/beaver.conf
+     owner=root
+     group=root
+     mode=644
+  notify:
+     - restart beaver
+  tags: beaver

@@ -1,0 +1,100 @@
+---
+# file: roles/check_mk_master_server/tasks/main.yml
+
+- name: Update repositories
+  apt: update_cache=yes
+  tags: check_mk,check_mk_master
+
+- name: Install mysql package
+  apt: name="{{ item }}" state=latest
+  with_items: [ 'python-mysqldb', 'mysql-server' ]
+  tags: check_mk,check_mk_master
+
+- name: Copy my.conf file to ~/.my.conf
+  template:
+    src: my.conf
+    dest: ~/.my.conf
+    owner: root
+    mode: 0600
+  tags: check_mk,check_mk_master
+
+- name: Check if OMD is installed
+  command: dpkg-query -W {{ omd_version }}
+  register: is_installed
+  failed_when: is_installed.rc > 1
+  changed_when: is_installed.rc == 1
+  tags: check_mk,check_mk_master
+
+- name: Check if image exists
+  stat: path=/tmp/{{ omd_version }}.deb
+  register: package_file
+  when: is_installed.rc == 1
+  tags: check_mk,check_mk_master
+
+- name: Download OMD package
+  get_url: url={{ url }} dest=/tmp/{{ omd_version }}.deb
+  when: (is_installed.rc == 1) and (package_file.stat.exists == False)
+  tags: check_mk,check_mk_master
+
+- name: Configure dpkg
+  shell: dpkg --configure -a
+  when: is_installed.rc == 1
+  tags: check_mk,check_mk_master
+
+- name: Install OMD package
+  shell: dpkg -i /tmp/{{ omd_version }}.deb
+  register: install
+  failed_when: install.rc == -1
+  changed_when: install.rc == 2
+  when: is_installed.rc == 1
+  tags: check_mk,check_mk_master
+
+- name: Install missing dependencies
+  shell: apt-get -f install -y --force-yes
+  when: is_installed.rc == 1
+  tags: check_mk,check_mk_master
+
+- name: Check if master site exists
+  shell: omd sites | grep {{ hostvars[inventory_hostname].site }}
+  register: exists
+  changed_when: exists.rc == 1
+  failed_when: exists.rc > 1
+  tags: check_mk,check_mk_master
+
+- name: Create OMD instance
+  shell: omd create {{ hostvars[inventory_hostname].site }}
+  when: exists.rc == 1
+  tags: check_mk,check_mk_master
+
+- name: Stop OMD instance
+  shell: omd stop {{ hostvars[inventory_hostname].site }}
+  register: result
+  failed_when: result.rc == -1
+  tags: check_mk,check_mk_master
+
+- name: Enable livestatus
+  shell: omd config {{ hostvars[inventory_hostname].site }} set LIVESTATUS_TCP on
+  tags: check_mk,check_mk_master
+
+- name: Change default gui
+  shell: omd config {{ hostvars[inventory_hostname].site }} set DEFAULT_GUI check_mk
+  tags: check_mk,check_mk_master
+
+- name: Get OMD status
+  shell: omd status {{ hostvars[inventory_hostname].site }} | grep "Overall state"
+  register: master_status
+  tags: check_mk,check_mk_master
+
+- name: Start OMD instance
+  shell: omd start {{ hostvars[inventory_hostname].site }}
+  register: result
+  tags: check_mk,check_mk_master
+
+- name: Import checks
+  copy:
+     src=serverside/
+     dest=/omd/sites/{{ hostvars[inventory_hostname].site }}/local/share/check_mk/checks/
+     owner={{ hostvars[inventory_hostname].site }}
+     group={{ hostvars[inventory_hostname].site }}
+     mode=0644
+  tags: sync_checks,check_mk,check_mk_master

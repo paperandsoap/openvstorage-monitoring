@@ -1,0 +1,4 @@
+---
+# file: roles/beaver/vars/main.yml
+
+redis_url: redis://:<password>@<host>:6379

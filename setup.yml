@@ -1,0 +1,14 @@
+---
+# file: setup.yml
+
+- include: operation_servers.yml
+- include: monitor_servers.yml
+- include: controller_servers.yml
+- include: compute_servers.yml
+- include: storage_servers.yml
+- include: hyperconverged_servers.yml
+- include: volumedriver_servers.yml
+- include: redis_servers.yml
+- include: grafana_servers.yml
+- include: elk_servers.yml
+- include: switches.yml

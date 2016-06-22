@@ -1,0 +1,6 @@
+---
+# file: host_vars/mon02
+
+site: slave
+location: Europe
+livestatus_port: 6557

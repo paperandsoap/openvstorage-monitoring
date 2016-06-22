@@ -1,0 +1,7 @@
+---
+# file: group_vars/mon
+
+beaver_conf: beaver_mon.conf.j2
+statsmonkey_group: mon
+statsmonkey_plugins:
+   - host_data

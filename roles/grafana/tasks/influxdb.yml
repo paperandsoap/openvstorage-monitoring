@@ -1,0 +1,58 @@
+---
+# file: roles/grafana/tasks/influxdb.yml
+
+- name: Influxdb apt key
+  apt_key:
+    url="https://repos.influxdata.com/influxdb.key"
+    state=present
+
+- name: Influxdb apt repo
+  apt_repository:
+    repo="deb https://repos.influxdata.com/debian trusty stable"
+    update_cache=yes
+
+- name: Install Influxdb apt packages
+  apt: name=influxdb update_cache=yes state=present
+
+- name: Influxdb config file
+  template: src=influxdb.conf.j2 dest=/etc/influxdb/influxdb.conf
+  notify: Restart influxdb
+
+- name: Start influxdb
+  service: name=influxdb state=restarted enabled=yes
+
+- name: Wait 10s until influxdb is started
+  pause: seconds=10
+
+- name: Create admin user
+  shell: influx -database _internal -execute "CREATE USER {{ admin_user }} WITH PASSWORD '{{ admin_password }}' WITH ALL PRIVILEGES"
+  register: output
+  failed_when: "('user already exists' in output.stdout) and (db_output.rc != 0)"
+  changed_when: "'Basic Auth' in output.stdout"
+
+- name: Drop default user
+  shell: influx -username {{ admin_user }} -password {{ admin_password }} -database _internal -execute "DROP USER root"
+  register: drop_output
+  failed_when: "'user not found' not in drop_output.stdout"
+  changed_when: "'user not found' in drop_output.stdout"
+
+- name: Create database {{ db_name }}
+  shell: influx -username {{ admin_user }} -password {{ admin_password }} -database _internal -execute "CREATE DATABASE {{ db_name }}"
+  register: db_output
+  failed_when: "('database already exists' not in db_output.stdout) and (db_output.rc != 0)"
+  changed_when: "'database already exists' in db_output.stdout"
+
+- name: Create user {{ db_user }}
+  shell: influx -username {{ admin_user }} -password {{ admin_password }} -database _internal -execute "CREATE USER {{ db_user }} WITH PASSWORD '{{ db_password }}'"
+  register: u_output
+  failed_when: "('user already exists' not in u_output.stdout) and (u_output.rc != 0)"
+  changed_when: "'user already exists' in u_output.stdout"
+
+- name: Grant privileges to user {{ db_user }}
+  shell: influx -username {{ admin_user }} -password {{ admin_password }} -database _internal -execute "GRANT ALL ON {{ db_name }} TO {{ db_user }}"
+
+- name: Create retention policy {{ retention }}
+  shell: influx -username {{ admin_user }} -password {{ admin_password }} -database _internal -execute "CREATE RETENTION POLICY ansible_policy ON {{ db_name }} DURATION {{ retention }} REPLICATION 1 DEFAULT"
+  register: r_output
+  failed_when: "('retention policy already exists' not in r_output.stdout) and (r_output.rc != 0)"
+  changed_when: "'retention policy already exists' in r_output.stdout"
