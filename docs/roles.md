@@ -5,6 +5,7 @@ They allow you to focus more on the big picture and only dive down into the deta
 
 OVS monitor roles:
 ```
+apache
 beaver
 check_mk_agent
 check_mk_master_server
@@ -26,15 +27,19 @@ grafana
 │   └── grafana.db
 ├── handlers
 │   └── main.yml
+├── meta
+│   └── main.yml
 ├── tasks
 │   ├── grafana.yml
 │   ├── influxdb.yml
 │   └── main.yml
 ├── templates
+│   ├── 001_grafana.j2
 │   ├── grafana.ini.j2
 │   └── influxdb.conf.j2
 └── vars
     └── main.yml
+
 ```
 
 **defaults** are default variables.
@@ -42,6 +47,8 @@ grafana
 **files** are files that will be copied to the node.
 
 **handlers** are actions that are triggered by the playbook. (e.g.: restarting services)
+
+**meta** are role dependencies that allows to automatically pull in other roles when using a role.
 
 **tasks** are commands that are executed in order.
 

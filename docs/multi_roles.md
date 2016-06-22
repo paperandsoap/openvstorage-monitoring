@@ -48,10 +48,10 @@ str04 ansible_host=<ip>
 [switch]
 ```
 
-ops_servers.yml:
+operation_servers.yml:
 ```
 ---
-# file: ops_servers.yml
+# file: operation_servers.yml
 
 - hosts: operation
   remote_user: root
@@ -99,8 +99,36 @@ roles/elk/vars/main.yml:
 # file: roles/elk/vars/main.yml
 
 elk_logstash:
+  version: 2.0
+  pid_file: /var/run/logstash.pid
   redis_ip: 127.0.0.1
-  redis_password: a_very_long_password
+  redis_password: admin
+  configs:
+    - { src: logstash-input.conf.j2, dest: 100-input.conf }
+    - { src: logstash-output.conf.j2, dest: 900-output.conf }
+    - { src: logstash-ovs.conf.j2, dest: 500-ovs.conf }
+    - { src: logstash-syslog.conf.j2, dest: 501-syslog.conf }
+    - { src: logstash-redis.conf.j2, dest: 502-redis.conf }
+    - { src: logstash-auth.conf.j2, dest: 503-auth.conf }
+    - { src: logstash-kern.conf.j2, dest: 504-kern.conf }
+    - { src: logstash-switchd.conf.j2, dest: 505-switchd.conf }
+    - { src: logstash-libvirtd.conf.j2, dest: 506-libvirtd.conf }
+
+  patterns:
+    - { src: ovs-pattern.j2, dest: ovs}
+
+elk_kibana:
+  version: 4.4
+  path: /opt/kibana
+  port: 5601
+```
+
+roles/beaver/vars/main.yml
+```
+---
+# file: roles/beaver/vars/main.yml
+
+redis_url: redis://:a_very_long_password@127.0.0.1:6379
 ```
 
 roles/grafana/vars/main.yml:
@@ -114,6 +142,19 @@ db_password: "grafana_user_password"
 retention: "7d"
 protocol: "https"
 port: "443"
+```
+
+roles/statsmonkey/vars/main.yml
+```
+# file: roles/statsmonkey/vars/main.yml
+
+transport: influxdb
+host: <host>
+port: 8086
+database: <db_name>
+user: grafana_user
+password: grafana_user_password
+plugins: /etc/statsmonkey/plugins
 ```
 
 ansible command:
