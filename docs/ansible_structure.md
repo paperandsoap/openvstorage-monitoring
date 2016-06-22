@@ -3,32 +3,38 @@
 ```
 ├── inventory
 ├── setup.yml
+├── compute_servers.yml
+├── controller_servers.yml
+├── elk_servers.yml
+├── grafana_servers.yml
+├── hyperconverged_servers.yml
+├── monitor_servers.yml
+├── operation_servers.yml
+├── redis_servers.yml
 ├── storage_servers.yml
 ├── switches.yml
 ├── volumedriver_servers.yml
-├── hyperconverged_servers.yml
-├── monitor_servers.yml
-├── ops_servers.yml
-├── compute_servers.yml
-├── controller_servers.yml
-├── data_servers.yml
-├── elk_servers.yml
-├── graph_servers.yml
 ├── host_vars
 │   ├── mon01
 │   └── mon02
 ├── group_vars
-│   ├── cmp
-│   ├── ctl
+│   ├── computenodes
+│   ├── controllers
 │   ├── elk
-│   ├── gph
+│   ├── grafana
 │   ├── hyperconverged
-│   ├── mon
-│   ├── ops
-│   ├── red
-│   ├── str
-│   └── switch
-|── roles
+│   ├── monitoring
+│   ├── operation
+│   ├── redis
+│   ├── storagenodes
+│   ├── switch
+│   └── volumedrivernodes
+├── roles
+    ├── apache
+    │   ├── files
+    │   │   └── 000-default.conf
+    │   └── tasks
+    │       └── main.yml
     ├── beaver
     │   ├── files
     │   │   └── beaver.daemon
@@ -49,6 +55,8 @@
     │   └── vars
     │       └── main.yml
     ├── check_mk_agent
+    │   ├── defaults
+    │   │   └── main.yml
     │   ├── files
     │   │   ├── clientside
     │   │   │   ├── backend
@@ -56,9 +64,7 @@
     │   │   │   └── ovs_framework
     │   │   ├── snmpd.conf
     │   │   └── snmpd.rc
-    │   ├── tasks
-    │   │   └── main.yml
-    │   └── vars
+    │   └── tasks
     │       └── main.yml
     ├── check_mk_master_server
     │   ├── defaults
@@ -109,17 +115,18 @@
     │   │   └── logstash-logrotate
     │   ├── handlers
     │   │   └── main.yml
+    │   ├── meta
+    │   │   └── main.yml
     │   ├── tasks
     │   │   ├── elasticsearch.yml
     │   │   ├── java.yml
     │   │   ├── kibana.yml
     │   │   ├── logstash.yml
-    │   │   ├── main.yml
-    │   │   └── nginx.yml
+    │   │   └── main.yml
     │   ├── templates
+    │   │   ├── 010_kibana.j2
     │   │   ├── elasticsearch-logging.yml.j2
     │   │   ├── elasticsearch.yml.j2
-    │   │   ├── kibana-default.j2
     │   │   ├── logstash-auth.conf.j2
     │   │   ├── logstash-input.conf.j2
     │   │   ├── logstash-kern.conf.j2
@@ -139,11 +146,14 @@
     │   │   └── grafana.db
     │   ├── handlers
     │   │   └── main.yml
+    │   ├── meta
+    │   │   └── main.yml
     │   ├── tasks
     │   │   ├── grafana.yml
     │   │   ├── influxdb.yml
     │   │   └── main.yml
     │   ├── templates
+    │   │   ├── 001_grafana.j2
     │   │   ├── grafana.ini.j2
     │   │   └── influxdb.conf.j2
     │   └── vars
@@ -177,4 +187,5 @@
         │   └── statsmonkey.conf.j2
         └── vars
             └── main.yml
+
 ```
