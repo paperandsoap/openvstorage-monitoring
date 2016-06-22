@@ -1,4 +1,4 @@
-# host_vars
+### host_vars
 
 After you've configured the inventory file, you need to define some host vars. Host vars are only used for the Check_MK hosts (master and slaves). In the directory host_vars, you need to create a file with the same name as your Check_MK hostname defined in the inventory file.
 

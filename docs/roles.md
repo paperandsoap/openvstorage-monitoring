@@ -1,4 +1,4 @@
-# Roles
+### Roles
 
 Roles in Ansible follow the idea of include files and transforms your configuration to clean and reusable abstractions.
 They allow you to focus more on the big picture and only dive down into the details when needed.
@@ -55,3 +55,5 @@ grafana
 **templates** are processed by the Jinja2 templating language. (variables from the defaults or vars directory will be used)
 
 **vars** are variables that you need to change.
+
+{% include "role_vars.md" %}
