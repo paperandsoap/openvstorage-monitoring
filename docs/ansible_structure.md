@@ -1,5 +1,15 @@
-# Ansible structure
+## Ansible structure
 
+* [Inventory](inventory.md)
+* [Host_vars](host_vars.md)
+* [Group_vars](group_vars.md)
+* [Setup.yml](setup.md)
+* [\*\_servers.yml](servers.md)
+* [Roles](roles.md)
+    * [Vars](role_vars.md)
+
+
+#
 ```
 ├── inventory
 ├── setup.yml

@@ -1,18 +1,23 @@
 # How to deploy the ovs monitor with Ansible
 
+## TOC
+* [Components](#components)
+* [Ansible structure](#ansible_structure)
+* [Ansible commands](#ansible_commands)
+* [What if you have 1 node for multiple roles?](#multi_roles)
+
+
+## Introduction
+
+This handbook guide you step by step how you can deploy all the ovs monitor components via Aansible.
+
+{% include "components.md" %}
+{% include "ansible_structure.md" %}
+{% include "ansible_commands.md" %}
+{% include "multi_roles.md" %}
 
 
 
-* [Introduction](introduction.md)
-* [Components](components.md)
-* [Ansible structure](ansible_structure.md)
-    * [Inventory](inventory.md)
-    * [Host_vars](host_vars.md)
-    * [Group_vars](group_vars.md)
-    * [Setup.yml](setup.md)
-    * [\*\_servers.yml](servers.md)
-    * [Roles](roles.md)
-        * [Vars](role_vars.md)
-* [Ansible commands](ansible_commands.md)
-* [What if you have 1 node for multiple roles?](multi_roles.md)
+
+
 
