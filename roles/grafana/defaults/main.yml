@@ -1,0 +1,8 @@
+---
+# file: roles/grafana/defaults/main.yml
+
+admin_user: "admin"
+admin_password: "admin"
+auth_enabled: true
+influxdb_url: https://s3.amazonaws.com/influxdb/influxdb_0.10.2-1_amd64.deb
+influxdb_dest: /tmp/influxdb.deb

@@ -1,0 +1,92 @@
+---
+# file: roles/check_mk_agent/tasks/main.yml
+
+- name: Install python-pip
+  apt: name={{ item }} state=latest update_cache=yes force=yes
+  with_items:
+     - python-dev
+     - python-pip
+  tags: check_mk_agent
+
+- name: Install pip packages
+  pip: name={{ item }} state=latest
+  with_items:
+     - timeout-decorator
+  tags: check_mk_agent
+
+- name: Check if xinetd is installed
+  shell: dpkg-query -W xinetd
+  register: is_installed
+  when: inventory_hostname not in groups['switch']
+  failed_when: is_installed.rc > 1
+  changed_when: is_installed.rc == 1
+  tags: check_mk_agent
+
+- name: Install xinetd package
+  apt: name=xinetd update_cache=yes state=latest
+  when: (inventory_hostname not in groups['switch']) and (is_installed.rc == 1)
+  tags: check_mk_agent
+
+- name: Check if check mk agent is installed
+  shell: dpkg-query -W {{ package }}
+  register: is_installed
+  failed_when: is_installed.rc > 1
+  changed_when: is_installed.rc == 1
+  when: inventory_hostname not in groups['switch']
+  tags: check_mk_agent
+
+- name: Check if image exists
+  stat: path=/tmp/{{ package }}.deb
+  register: package_file
+  when: (inventory_hostname not in groups['switch']) and (is_installed.rc == 1)
+  tags: check_mk_agent
+
+- name: Download check_mk agent package
+  get_url: url={{ url }} dest=/tmp/{{ package }}.deb
+  when:  (inventory_hostname not in groups['switch']) and (is_installed.rc == 1) and (package_file.stat.exists == False)
+  tags: check_mk_agent
+
+- name: Install check mk agent package
+  shell: dpkg -i /tmp/{{ package }}.deb
+  when: (inventory_hostname not in groups['switch']) and (is_installed.rc == 1)
+  tags: check_mk_agent
+
+- name: Import checks
+  copy:
+     src=clientside/
+     dest=/usr/lib/check_mk_agent/plugins/
+     owner=root
+     group=root
+     mode=0755
+  when: inventory_hostname not in groups['switch']
+  tags: check_mk_agent, sync_checks
+
+- name: Switch - Copy snmpd.rc
+  copy:
+     src=snmpd.rc
+     dest=/etc/jdoo/jdoorc.d/snmpd.rc
+     owner=root
+     group=root
+     mode=0644
+  when: inventory_hostname in groups['switch']
+  tags: check_mk_agent
+
+- name: Switch - Copy snmpd.conf
+  copy:
+     src=snmpd.conf
+     dest=/etc/snmp/snmpd.conf
+     owner=root
+     group=root
+     mode=0600
+  when: inventory_hostname in groups['switch']
+  tags: check_mk_agent
+
+- name: Switch - Start snmpd
+  service: name=snmpd state=restarted enabled=yes
+  when: inventory_hostname in groups['switch']
+  tags: check_mk_agent
+
+- name: Switch - Reload jdoo
+  shell: jdoo reload
+  when: inventory_hostname in groups['switch']
+  tags: check_mk_agent

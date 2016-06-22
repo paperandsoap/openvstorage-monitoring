@@ -1,0 +1,11 @@
+---
+# file: compute_servers.yml
+
+- hosts: computenodes
+  remote_user: root
+  roles:
+    - common
+    - beaver
+    - check_mk_agent
+    - health_check
+    - statsmonkey

@@ -1,0 +1,78 @@
+backend_thresholds = (70.0, 90.0)
+
+
+def humansize(nbytes):
+    suffixes = ['B', 'KB', 'MB', 'GB', 'TB', 'PB']
+    if nbytes == 0: return '0 B'
+    i = 0
+    while nbytes >= 1024 and i < len(suffixes)-1:
+        nbytes /= 1024.
+        i += 1
+    f = ('%.2f' % nbytes).rstrip('0').rstrip('.')
+    return '%s %s' % (f, suffixes[i])
+
+
+def inventory_backend(info):
+    inventory = []
+    for line in info:
+        inventory.append((line[0], backend_thresholds))
+    return inventory
+
+
+def check_backend(item, params, info):
+    warn, crit = params
+    for i in info:
+        if 'backend_size' in item and item == i[0]:
+            service, backend, used, total, sec = i
+            used_space = float(used)
+            total_space = float(total)
+            sec = float(sec)
+
+            if used_space == -100 and total_space == -100:
+                return 2, "Script Time out: {0:.2f} sec".format(round(sec, 2))
+            elif total_space == 0:
+                return 0, "{0}/{1} ({2} %) disk space used ({3:.2f} sec)".format(humansize(used_space), humansize(total_space), 0, round(sec, 2)), perfdata
+
+            percentage_used_space = round(float(used_space / total_space) * 100.0, 2)
+            warn_level = round(float(float(total_space) * float(warn)) / 100.0, 2)
+            crit_level = round(float(float(total_space) * float(crit)) / 100.0, 2)
+            perfdata = [("size", used_space, warn_level, crit_level, 0, total_space)]
+
+            if float(percentage_used_space) > float(crit):
+                return 2, "{0}/{1} ({2} %) disk space used ({3:.2f} sec)".format(humansize(used_space), humansize(total_space), percentage_used_space, round(sec, 2)), perfdata
+            elif float(percentage_used_space) > float(warn):
+                return 1, "{0}/{1} ({2} %) disk space used ({3:.2f} sec)".format(humansize(used_space), humansize(total_space), percentage_used_space, round(sec, 2)), perfdata
+            else:
+                return 0, "{0}/{1} ({2} %) disk space used ({3:.2f} sec)".format(humansize(used_space), humansize(total_space), percentage_used_space, round(sec, 2)), perfdata
+            return 3, "Something weird happens"
+        elif 'asd_status' in item and item == i[0]:
+            service = i[0]
+            backend = i[1]
+            claimed = int(i[2])
+            warning = int(i[3])
+            failure = int(i[4])
+            error = int(i[5])
+            decommissioned = int(i[6])
+            decommissioning = int(i[7])
+            sec = float(i[8])
+            fail_err = failure + error
+            if claimed == -100 and warning == -100 and failure == -100 and error == -100 and decommissioned == -100 and decommissioning == -100:
+                return 2, "Script Time out: {0:.2f} sec".format(round(sec, 2))
+
+            perfdata = [("claimed", claimed), ("warning", warning), ("failure_error", fail_err), ("decommissioned", decommissioned), ("decommissioning", decommissioning)]
+            if failure > 0 or error > 0:
+                return 2, "failures: {0}, errors: {1} ({2:.2f} sec)".format(failure, error, round(sec, 2)), perfdata
+            elif warning > 0:
+                return 1, "warnings: {0} ({1:.2f} sec)".format(warning, round(sec, 2)), perfdata
+            elif claimed > 0:
+                return 0, "claimed: {0}, warnings: {1}, failures: {2}, errors: {3}, decommissioning: {4}, decommissioned: {5} ({6:.2f} sec)".format(claimed, warning, failure, error, decommissioning, decommissioned, round(sec, 2)), perfdata
+            else:
+                return 3, "Something weird happens"
+
+
+check_info["backend"] = {
+    'check_function':           check_backend,
+    'inventory_function':       inventory_backend,
+    'service_description':      'Backend',
+    'has_perfdata':             True,
+}

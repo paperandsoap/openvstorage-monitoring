@@ -1,0 +1,5 @@
+---
+# file: roles/beaver/handlers/main.yml
+
+- name: restart beaver
+  service: name=beaver state=restarted enabled=yes

@@ -1,0 +1,11 @@
+---
+# file: hyperconverged_servers.yml
+
+- hosts: hyperconverged
+  remote_user: root
+  roles:
+    - common
+    - beaver
+    - check_mk_agent
+    - health_check
+    - statsmonkey

@@ -1,0 +1,27 @@
+---
+# file: roles/elk/handlers/main.yml
+
+- name: Restart elasticsearch
+  service:
+    name=elasticsearch
+    state=restarted
+
+- name: Restart logstash
+  service:
+    name=logstash
+    state=restarted
+
+- name: Restart nginx
+  service:
+    name=nginx
+    state=restarted
+
+- name: Restart kibana
+  service:
+    name=kibana
+    state=restarted
+
+- name: Reload apache2
+  service:
+    name=apache2
+    state=reloaded

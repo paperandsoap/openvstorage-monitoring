@@ -1,0 +1,15 @@
+filter {
+  if [type] == "ovs" {
+    grok {
+      patterns_dir => "/etc/logstash/patterns"
+      match => { "message" => "%{OVSDATE:date} - %{HOSTNAME:hostname} - %{PIDTHREAD:pid_thread} - %{PROGRAM:program} - %{NUM:seq_number} - %{LOGLEVEL:severity} - %{GREEDYDATA:log_message}" }
+    }
+    date {
+      match => ["date", "yyyy-MM-dd HH:mm:ss SSSSSS ZZ", "yyyy/MM/dd HH:mm:ss SSSSSS ZZ"]
+      target => "date"
+    }
+    mutate {
+      uppercase => [ "severity" ]
+    }
+  }
+}

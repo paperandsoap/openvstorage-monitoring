@@ -1,0 +1,105 @@
+---
+# file: roles/statsmonkey/tasks/main.yml
+
+- name: Install python-pip
+  apt: name={{ item }} state=latest update_cache=yes force=yes
+  with_items:
+     - python-dev
+     - python-pip
+  tags: statsmonkey
+
+- name: Install pip packages
+  pip: name={{ item }} state=latest
+  with_items:
+     - python-dateutil
+     - psutil
+     - influxdb
+     - redis
+  tags: statsmonkey
+
+- name: Import statsmonkey
+  copy:
+     src=statsmonkey/
+     dest=/opt/statsmonkey/
+     owner=root
+     group=root
+     mode=0750
+  tags: statsmonkey
+
+- name: Create config directory
+  file: path=/etc/statsmonkey state=directory mode=0755
+  tags: statsmonkey
+
+- name: Create plugin directory
+  file: path={{ plugins }} state=directory mode=0755
+  tags: statsmonkey
+
+- name: Statsmonkey config file
+  template:
+     src=statsmonkey.conf.j2
+     dest=/etc/statsmonkey/statsmonkey.conf
+     owner=root
+     group=root
+     mode=0644
+  tags: statsmonkey
+
+- name: Copy plugins
+  copy:
+     src={{ item }}
+     dest={{ plugins }}/{{ item }}
+     owner=root
+     group=root
+     mode=0755
+  with_items: "{{ statsmonkey_plugins }}"
+  tags: statsmonkey
+
+- name: Import etcd influxdb config
+  shell: "etcdctl set /ops/db '{\"transport\": \"{{ transport }}\", \"host\": \"{{ host }}\",\"port\": {{ port }}, \"username\": \"{{ user }}\", \"password\": \"{{ password }}\", \"database\": \"{{ database }}\"}'"
+  when: inventory_hostname in groups['controllers'] or inventory_hostname in groups['computenodes'] or inventory_hostname in groups['hyperconverged'] or inventory_hostname in groups['volumedrivernodes']
+  tags: statsmonkey
+
+- name: Check if ovs lib exists
+  stat: path=/opt/OpenvStorage/ovs/lib
+  register: ovs_lib
+  tags: statsmonkey
+
+- name: Import celery plugins
+  copy:
+     src=statsmonkeyscheduledtask.py
+     dest=/opt/OpenvStorage/ovs/lib/statsmonkeyscheduledtask.py
+     owner=ovs
+     group=ovs
+     mode=0644
+  when: ovs_lib.stat.isdir is defined and ovs_lib.stat.isdir
+  register: cel_plugins
+  tags: statsmonkey
+
+- name: Restart ovs-watcher-framework
+  shell: restart ovs-watcher-framework
+  when: cel_plugins.changed and (inventory_hostname in groups['controllers'] or inventory_hostname in groups['computenodes'] or inventory_hostname in groups['hyperconverged'] or inventory_hostname in groups['volumedrivernodes'])
+  tags: statsmonkey
+
+- name: Restart ovs-scheduled-tasks
+  shell: restart ovs-scheduled-tasks
+  register: output
+  when: cel_plugins.changed and (inventory_hostname in groups['controllers'] or inventory_hostname in groups['hyperconverged'] or inventory_hostname in groups['volumedrivernodes'])
+  failed_when: "('Unknown job' not in output.stderr) and (output.rc != 0)"
+  changed_when: "'Unknown job' in output.stderr"
+  tags: statsmonkey
+
+- name: Create log directory
+  file: path=/var/log/statsmonkey state=directory mode=0755
+  tags: statsmonkey
+
+- name: Create cron for statsmonkey
+  cron: name="push statistics to influxdb" job="/usr/bin/python /opt/statsmonkey/statsmonkey.py >> /var/log/statsmonkey/statsmonkey.log 2>&1"
+  tags: statsmonkey
+
+- name: Import logrotate
+  copy:
+     src=statsmonkey-logs
+     dest=/etc/logrotate.d/statsmonkey-logs
+     owner=root
+     group=root
+     mode=0644
+  tags: statsmonkey

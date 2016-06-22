@@ -1,0 +1,51 @@
+---
+# file: roles/grafana/tasks/grafana.yml
+
+- name: Grafana apt key
+  apt_key:
+    url="https://packagecloud.io/gpg.key"
+    state=present
+
+- name: Grafana apt repo
+  apt_repository:
+    repo="deb https://packagecloud.io/grafana/stable/debian/ wheezy main"
+    update_cache=yes
+
+- name: Install packages for grafana
+  apt: name={{ item }} state=installed
+  with_items:
+     - fontconfig-config
+     - fonts-dejavu-core
+     - libfontconfig1
+
+- name: Install grafana apt packages
+  apt: name=grafana update_cache=yes state=present
+  register: is_installed
+  notify: Restart grafana
+
+- name: Enable priv ports for grafana
+  shell:  setcap 'cap_net_bind_service=+ep' /usr/sbin/grafana-server
+
+- name: Update grafana.db
+  copy:
+     src=grafana.db
+     dest=/var/lib/grafana/grafana.db
+     owner=grafana
+     group=grafana
+     mode=0644
+  when: is_installed.changed
+
+- name: Copy Apache config file
+  template:
+     src=001_grafana.j2
+     dest=/etc/apache2/mon-tools/001_grafana
+  notify: Reload apache2
+
+- name: Grafana config file
+  template:
+     src=grafana.ini.j2
+     dest=/etc/grafana/grafana.ini
+
+- name: Install grafana piechart
+  shell: grafana-cli plugins install grafana-piechart-panel
+  notify: Restart grafana

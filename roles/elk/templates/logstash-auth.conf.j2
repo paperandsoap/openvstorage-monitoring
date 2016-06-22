@@ -1,0 +1,12 @@
+filter {
+  if [type] == "auth" {
+    grok {
+      patterns_dir => "/etc/logstash/patterns"
+      match => { "message" => "%{SYSLOGTIMESTAMP:syslog_date} %{SYSLOGHOST:hostname} %{PROGRAM:program}(?:\[%{POSINT:pid_thread}\])?: %{GREEDYDATA:log_message}" }
+    }
+    date {
+      match => [ "syslog_date", "MMM  d HH:mm:ss", "MMM dd HH:mm:ss" ]
+      target => "syslog_date"
+    }
+  }
+}

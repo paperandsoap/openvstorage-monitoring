@@ -1,0 +1,35 @@
+######################### ElasticSearch Configuration  ########################
+
+# This file is managed by Ansible, do not be surpised when your changes are overwritten!
+#
+# Please see the source file for context and more information:
+# https://github.com/elasticsearch/elasticsearch/blob/master/config/elasticsearch.yml
+#
+
+############################## Scripting ######################################
+
+script.groovy.sandbox.enabled: true
+
+############################## Network And HTTP ###############################
+{% if elk_elasticsearch.allowed_address is defined %}
+network.host: {{ elk_elasticsearch.allowed_address }}
+{% endif %}
+{% if elk_elasticsearch.http.port is defined %}
+http.port: {{ elk_elasticsearch.http.port }}
+{% endif %}
+{% if elk_elasticsearch.path is defined %}
+path.data: {{ elk_elasticsearch.path }}
+{% endif %}
+index.store.throttle.type: none
+bootstrap.mlockall: true
+threadpool.search.queue_size: 300
+#threadpool.index.type: cached
+threadpool.index.size: 16
+threadpool.index.queue_size: 250000
+index.refresh_interval: 10s
+index.translog.flush_threshold_ops: 50000
+indices.memory.index_buffer_size: 30%
+indices.memory.min_shard_index_buffer_size: 12mb
+indices.memory.min_index_buffer_size: 96mb
+script.inline: on
+script.indexed: on

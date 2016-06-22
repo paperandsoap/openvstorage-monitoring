@@ -1,0 +1,5 @@
+---
+# file: roles/check_mk_agent/vars/main.yml
+
+url: "http://mathias-kettner.de/download/check-mk-agent_1.2.4p5-2_all.deb"
+package: "check-mk-agent"

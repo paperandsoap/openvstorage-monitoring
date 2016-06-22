@@ -1,0 +1,10 @@
+---
+# file: roles/grafana/tasks/main.yml
+
+- name: Install influxdb
+  include: influxdb.yml
+  tags: grafana
+
+- name: Install grafana
+  include: grafana.yml
+  tags: grafana

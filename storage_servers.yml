@@ -1,0 +1,10 @@
+---
+# file: storage_servers.yml
+
+- hosts: storagenodes
+  remote_user: root
+  roles:
+    - common
+    - beaver
+    - check_mk_agent
+    - statsmonkey

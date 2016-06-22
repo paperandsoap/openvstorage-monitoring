@@ -1,0 +1,4 @@
+---
+# file: host_vars/mon01
+
+site: monitor

@@ -1,0 +1,14 @@
+---
+# file: roles/redis/tasks/main.yml
+
+- name: Install redis-server
+  apt: name=redis-server state=latest update_cache=yes
+  tags: redis
+
+- name: Create redis configuration
+  template:
+     src=redis.conf.j2
+     dest=/etc/redis/redis.conf
+  notify:
+     - Restart redis-server
+  tags: redis

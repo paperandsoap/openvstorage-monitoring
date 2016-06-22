@@ -1,0 +1,10 @@
+---
+# file: roles/common/tasks/main.yml
+
+- name: Install ntp apt package
+  apt: name=ntp state=latest update_cache=yes
+  tags: common, ntp
+
+- name: Exchange root ssh key
+  authorized_key: user=root key="{{ lookup('file', '/root/.ssh/id_rsa.pub') }}"
+  tags: common, exchange_keys

@@ -1,0 +1,26 @@
+---
+# file: roles/elk/vars/main.yml
+
+elk_logstash:
+  version: 2.0
+  pid_file: /var/run/logstash.pid
+  redis_ip: <ip>
+  redis_password: <password>
+  configs:
+    - { src: logstash-input.conf.j2, dest: 100-input.conf }
+    - { src: logstash-output.conf.j2, dest: 900-output.conf }
+    - { src: logstash-ovs.conf.j2, dest: 500-ovs.conf }
+    - { src: logstash-syslog.conf.j2, dest: 501-syslog.conf }
+    - { src: logstash-redis.conf.j2, dest: 502-redis.conf }
+    - { src: logstash-auth.conf.j2, dest: 503-auth.conf }
+    - { src: logstash-kern.conf.j2, dest: 504-kern.conf }
+    - { src: logstash-switchd.conf.j2, dest: 505-switchd.conf }
+    - { src: logstash-libvirtd.conf.j2, dest: 506-libvirtd.conf }
+
+  patterns:
+    - { src: ovs-pattern.j2, dest: ovs}
+
+elk_kibana:
+  version: 4.4
+  path: /opt/kibana
+  port: 5601

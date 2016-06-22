@@ -1,0 +1,7 @@
+---
+# file: group_vars/red
+
+beaver_conf: beaver_red.conf.j2
+statsmonkey_group: red
+statsmonkey_plugins:
+   - host_data
