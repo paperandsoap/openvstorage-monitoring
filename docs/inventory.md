@@ -1,4 +1,4 @@
-# Inventory
+### Inventory
 
 **Do not delete or edit the group names (the sections in brackets).**
 
@@ -77,14 +77,14 @@ sw02 ansible_host=<ip>
 
 **elk** group: Define the elk stack. min 0, max infinity. Elk stack cluster not implemented.
 
-## Hyperscale settings
+#### Hyperscale settings
 **controllers** group: Define the ovs controllers. min 3, max 3.
 
 **computenodes** group: Define the ovs compute nodes. min 0, max infinity.
 
 **storagenodes** group: Define the ovs storage nodes. min 1, max infinity.
 
-## Hyperscale with accelerated backend settings
+#### Hyperscale with accelerated backend settings
 **controllers** group: Define the ovs controllers. min 3, max 3.
 
 **computenodes** group: Define the ovs compute nodes. min 0, max infinity.
@@ -93,5 +93,5 @@ sw02 ansible_host=<ip>
 
 **volumedrivernodes** group: Define the volumedriver nodes. min 1, max infinity.
 
-## Hyperconverged settings
+#### Hyperconverged settings
 **hyperconverged** group: Define the hyperconverged nodes. min 3, max infinity.

@@ -1,15 +1,13 @@
 ## Ansible structure
 
-* [Inventory](inventory.md)
-* [Host_vars](host_vars.md)
-* [Group_vars](group_vars.md)
-* [Setup.yml](setup.md)
-* [\*\_servers.yml](servers.md)
-* [Roles](roles.md)
-    * [Vars](role_vars.md)
+{% include "inventory.md" %}
+{% include "host_vars.md" %}
+{% include "group_vars.md" %}
+{% include "setup.md" %}
+{% include "servers.md" %}
+{% include "roles.md" %}
 
-
-#
+### Example
 ```
 ├── inventory
 ├── setup.yml

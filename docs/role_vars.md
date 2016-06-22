@@ -1,4 +1,4 @@
-# Vars
+#### Vars
 
 In the vars directory you need to change the variables. Example:
 
