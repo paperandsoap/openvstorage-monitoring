@@ -10,3 +10,4 @@ An ELK-stack consists of 3 open source components:
 * Logstash: a log pipeline tool that accepts various inputs and targets. In our case, it will read logging from a redis queue and store them into elasticsearch
 * Kibana: a visualisation tool on top of elasticsearch
 
+
