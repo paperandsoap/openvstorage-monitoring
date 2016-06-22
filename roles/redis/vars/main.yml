@@ -1,0 +1,6 @@
+---
+# file: roles/redis/vars/main.yml
+
+password: <password>
+max_memory: <max_memory>
+max_memory_policy: allkeys-random

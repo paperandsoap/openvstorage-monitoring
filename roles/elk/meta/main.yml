@@ -1,0 +1,5 @@
+---
+# file: roles/elk/meta/main.yml
+
+dependencies:
+   - { role: apache }

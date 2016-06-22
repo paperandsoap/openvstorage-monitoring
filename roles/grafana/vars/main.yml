@@ -1,0 +1,8 @@
+---
+# file: roles/grafana/vars/main.yml
+
+db_name: "statistics"
+db_user: "grafana"
+db_password: "grafana"
+retention: "7d"
+port: "8080"

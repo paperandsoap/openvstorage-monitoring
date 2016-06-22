@@ -1,0 +1,9 @@
+input {
+  redis {
+    host => "{{ elk_logstash.redis_ip }}"
+    password => "{{ elk_logstash.redis_password }}"
+    data_type => "list"
+    key => "logs"
+    codec => json
+  }
+}

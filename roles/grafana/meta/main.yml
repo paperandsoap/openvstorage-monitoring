@@ -1,0 +1,5 @@
+---
+# file: roles/grafana/meta/main.yml
+
+dependencies:
+   - { role: apache }

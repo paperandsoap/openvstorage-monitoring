@@ -1,0 +1,32 @@
+def inventory_ovs_framework(info):
+    inventory = []
+    for line in info:
+        inventory.append((line[0], None))
+    return inventory
+
+
+def check_ovs_framework(item, params, info):
+    for name, standalone, sync, catchup, degraded, sec in info:
+        if item == 'dtl_status':
+            standalone = int(standalone)
+            sync = int(sync)
+            catchup = int(catchup)
+            degraded = int(degraded)
+            sec = float(sec)
+            if standalone == -100 and sync == -100 and catchup == -100 and degraded == -100:
+                return 2, "Script Time out: {0:.2f} sec".format(round(sec,2))
+
+            if degraded > 0:
+                return 2, "Degraded vdisks: {0} ({1:.2f}sec)".format(degraded, round(sec,2))
+            elif catchup > 0:
+                return 1, "Catchup vdisks: {0} ({1:.2f}sec)".format(catchup, round(sec,2))
+            elif standalone > 0 or sync > 0:
+                return 0, "Standalone/sync vdisks: {0}, Catchup vdisks: {1}, Degraded vdisks: {2} ({3:.2f}sec)".format((standalone + sync), catchup, degraded, round(sec,2))
+
+        return 3, "Something weird happens"
+
+check_info["ovs_framework"] = {
+    'check_function':           check_ovs_framework,
+    'inventory_function':       inventory_ovs_framework,
+    'service_description':      'OVS framework'
+}

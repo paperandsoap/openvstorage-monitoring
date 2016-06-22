@@ -1,0 +1,10 @@
+---
+# file: operation_servers.yml
+
+- hosts: operation
+  remote_user: root
+  roles:
+    - common
+    - beaver
+    - check_mk_agent
+    - statsmonkey

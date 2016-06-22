@@ -1,0 +1,19 @@
+---
+# file: monitor_servers.yml
+
+- hosts: check_mk_master
+  remote_user: root
+  roles:
+    - common
+    - check_mk_agent
+    - check_mk_master_server
+    - statsmonkey
+
+- hosts: check_mk_slaves
+  remote_user: root
+  roles:
+    - common
+    - beaver
+    - check_mk_agent
+    - check_mk_slave_server
+    - statsmonkey

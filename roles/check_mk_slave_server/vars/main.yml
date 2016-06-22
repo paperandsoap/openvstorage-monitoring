@@ -1,0 +1,5 @@
+---
+# file: roles/check_mk_slave_server/vars/main.yml
+
+user: <mysql_username>
+password: <mysql_password>

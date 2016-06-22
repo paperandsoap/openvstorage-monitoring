@@ -1,0 +1,27 @@
+---
+# file: roles/elk/defaults/main.yml
+
+elk_java:
+  flavor: openjdk
+  oracle:
+    - oracle-java7-installer
+    - oracle-java7-set-default
+  openjdk:
+    - openjdk-7-jre-headless
+
+elk_elasticsearch:
+  version: 2.x
+  pid_file: /var/run/elasticsearch.pid
+  path:  /opt/elasticsearch
+  http:
+    port: 9200
+  allowed_address: 0.0.0.0
+
+elk_nginx:
+  port: 80
+  user: root
+
+elk_common_packages:
+    - python-apt
+    - python-pycurl
+    - python-pip

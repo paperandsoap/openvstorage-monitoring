@@ -1,0 +1,12 @@
+filter {
+  if [type] == "switchd" {
+    grok {
+      patterns_dir => "/etc/logstash/patterns"
+      match => { "message" => "%{OVSDATE:date} %{SYSLOGHOST:hostname} %{WORD:program}(?:\[%{POSINT:pid_thread}\])?: %{GREEDYDATA:log_message}" }
+    }
+    date {
+      match => ["date", "yyyy-MM-dd'T'HH:mm:ss.SSSSSSZ"]
+      target => "date"
+    }
+  }
+}

@@ -1,0 +1,9 @@
+---
+# file: switches.yml
+
+- hosts: switch
+  remote_user: root
+  roles:
+    - common
+    - beaver
+    - check_mk_agent

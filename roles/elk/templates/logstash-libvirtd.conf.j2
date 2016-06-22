@@ -1,0 +1,16 @@
+filter {
+  if [type] == "libvirtd" {
+    grok {
+      patterns_dir => "/etc/logstash/patterns"
+      match => { "message" => "%{OVSDATE:date}: %{INT}: %{LOGLEVEL:severity} : %{WORD}:%{INT} : %{GREEDYDATA:log_message}" }
+      add_field => [ "program", "libvirtd" ]
+    }
+    date {
+      match => ["date", "yyyy-MM-dd HH:mm:ss.SSSZ"]
+      target => "date"
+    }
+    mutate {
+      uppercase => [ "severity" ]
+    }
+  }
+}

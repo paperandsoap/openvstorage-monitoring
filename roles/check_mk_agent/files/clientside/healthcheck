@@ -1,0 +1,4 @@
+#!/bin/bash
+
+echo '<<<healthcheck>>>'
+/usr/bin/ovs healthcheck unattended

@@ -1,0 +1,8 @@
+/var/log/statsmonkey/*.log {
+    rotate 5
+    daily
+    size 50M
+    compress
+    copytruncate
+    notifempty
+}

@@ -1,0 +1,8 @@
+---
+# file: group_vars/volumedrivernodes
+
+beaver_conf: volumedrivernodes.conf.j2
+statsmonkey_group: volumedrivernodes
+statsmonkey_plugins:
+   - host_data
+   - alba_proxy_data

@@ -1,0 +1,9 @@
+/var/log/kibana/*.stderr /var/log/kibana/*.stdout {
+    rotate 5
+    size 500M
+    daily
+    compress
+    copytruncate
+    missingok
+    notifempty
+}

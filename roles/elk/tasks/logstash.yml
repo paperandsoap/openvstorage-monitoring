@@ -1,0 +1,42 @@
+---
+# file: roles/elk/tasks/logstash.yml
+
+- name: Logstash apt repo
+  apt_repository:
+    repo="deb http://packages.elastic.co/logstash/{{ elk_logstash.version }}/{{ ansible_os_family|lower }} stable main"
+    update_cache=yes
+  when: ansible_os_family == 'Debian'
+
+- name: Install logstash apt packages
+  apt: name=logstash update_cache=yes state=present
+  when: ansible_os_family == 'Debian'
+  notify: Restart logstash
+
+- name: Logstash conf file
+  template:
+    src={{ item.src }}
+    dest=/etc/logstash/conf.d/{{ item.dest }}
+    owner=root group=root mode=644
+  with_items: "{{ elk_logstash.configs }}"
+  notify: Restart logstash
+
+- name: Create pattern directory
+  file: path=/etc/logstash/patterns state=directory mode=775
+
+- name: Logstash pattern files
+  template:
+    src={{ item.src }}
+    dest=/etc/logstash/patterns/{{ item.dest }}
+    owner=root group=root mode=644
+  with_items: "{{ elk_logstash.patterns }}"
+  when: elk_logstash.patterns is defined
+  notify: Restart logstash
+  tags: logstash_pattern
+
+- name: Import logrotate
+  copy:
+     src=logstash-logrotate
+     dest=/etc/logrotate.d/logstash
+     owner=root
+     group=root
+     mode=0644

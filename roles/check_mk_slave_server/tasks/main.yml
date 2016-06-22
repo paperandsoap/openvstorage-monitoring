@@ -1,0 +1,118 @@
+---
+# file: roles/check_mk_slave_server/tasks/main.yml
+
+- name: Update repositories
+  apt: update_cache=yes
+  tags: check_mk,check_mk_slaves
+
+- name: Install mysql package
+  apt: name="{{ item }}" state=latest
+  with_items: [ 'python-mysqldb', 'mysql-server' ]
+  tags: check_mk,check_mk_slaves
+
+- name: Copy my.conf file to ~/.my.conf
+  template:
+    src: my.conf
+    dest: ~/.my.conf
+    owner: root
+    mode: 0600
+  tags: check_mk,check_mk_slaves
+
+- name: Check if OMD is installed
+  command: dpkg-query -W {{ omd_version }}
+  register: is_installed
+  failed_when: is_installed.rc > 1
+  changed_when: is_installed.rc == 1
+  tags: check_mk,check_mk_slaves
+
+- name: Check if image exists
+  stat: path=/tmp/{{ omd_version }}.deb
+  register: package_file
+  when: is_installed.rc == 1
+  tags: check_mk,check_mk_slaves
+
+- name: Download OMD package
+  get_url: url={{ url }} dest=/tmp/{{ omd_version }}.deb
+  when: (is_installed.rc == 1) and (package_file.stat.exists == False)
+  tags: check_mk,check_mk_slaves
+
+- name: Configure dpkg
+  shell: dpkg --configure -a
+  when: is_installed.rc == 1
+  tags: check_mk,check_mk_slaves
+
+- name: Install OMD package
+  shell: dpkg -i /tmp/{{ omd_version }}.deb
+  register: install
+  failed_when: install.rc == -1
+  changed_when: install.rc == 2
+  when: is_installed.rc == 1
+  tags: check_mk,check_mk_slaves
+
+- name: Install missing dependencies
+  shell: apt-get -f install -y --force-yes
+  when: is_installed.rc == 1
+  tags: check_mk,check_mk_slaves
+
+- name: Check if slaves site exists
+  shell: omd sites | grep {{ hostvars[inventory_hostname].site }}
+  register: exists
+  changed_when: exists.rc == 1
+  failed_when: exists.rc > 1
+  tags: check_mk,check_mk_slaves
+
+- name: Create OMD instance
+  shell: omd create {{ hostvars[inventory_hostname].site }}
+  when: exists.rc == 1
+  tags: check_mk,check_mk_slaves
+
+- name: Stop OMD instance
+  shell: omd stop {{ hostvars[inventory_hostname].site }}
+  register: result
+  failed_when: result.rc == -1
+  tags: check_mk,check_mk_slaves
+
+- name: Enable livestatus
+  shell: omd config {{ hostvars[inventory_hostname].site }} set LIVESTATUS_TCP on
+  tags: check_mk,check_mk_slaves
+
+- name: Set livestatus port
+  shell: omd config {{ hostvars[inventory_hostname].site }} set LIVESTATUS_TCP_PORT {{ livestatus_port }}
+  tags: check_mk,check_mk_slaves
+
+- name: Change default gui
+  shell: omd config {{ hostvars[inventory_hostname].site }} set DEFAULT_GUI check_mk
+  tags: check_mk,check_mk_slaves
+  
+- name: Get OMD status
+  shell: omd status {{ hostvars[inventory_hostname].site }} | grep "Overall state"
+  register: slaves_status
+  tags: check_mk,check_mk_slaves
+
+- name: Start OMD instance
+  shell: omd start {{ hostvars[inventory_hostname].site }}
+  register: result
+  tags: check_mk,check_mk_slaves
+
+- name: Import checks
+  copy:
+     src=serverside/
+     dest=/omd/sites/{{ hostvars[inventory_hostname].site }}/local/share/check_mk/checks/
+     owner={{ hostvars[inventory_hostname].site }}
+     group={{ hostvars[inventory_hostname].site }}
+     mode=0644
+  tags: sync_checks,check_mk,check_mk_slaves
+
+- name: Fetch output
+  shell: "echo \"'{{ hostvars[inventory_hostname].site }}': { 'alias': u'Slave running on {{ hostvars[inventory_hostname].location }}', 'disabled': False, 'insecure': False, 'multisiteurl': 'http://{{ hostvars[inventory_hostname].ansible_default_ipv4.address }}/{{ hostvars[inventory_hostname].site }}/check_mk/', 'persist': False, 'replication': 'slave', 'socket': 'tcp:{{ hostvars[inventory_hostname].ansible_default_ipv4.address }}:6557', 'timeout': 10, 'url_prefix': 'http://{{ hostvars[inventory_hostname].ansible_default_ipv4.address }}/{{ hostvars[inventory_hostname].site }}/'}\""
+  register: settings
+  tags: print_slave_connection,check_mk,check_mk_slaves
+
+- name: Convert to json
+  set_fact: "{{ inventory_hostname + '_output'}}={{ settings.stdout|to_json }}"
+  changed_when: settings.rc == 0
+  tags: print_slave_connection,check_mk,check_mk_slaves
+
+- name: Give these settings to BEOPS
+  debug: var="{{ inventory_hostname + '_output' }}"
+  tags: print_slave_connection,check_mk,check_mk_slaves

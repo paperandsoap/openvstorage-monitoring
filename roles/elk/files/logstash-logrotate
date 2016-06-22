@@ -1,0 +1,9 @@
+/var/log/logstash/*.log /var/log/logstash/*.stdout /var/log/logstash/*.stderr {
+    rotate 5
+    size 500M
+    daily
+    compress
+    copytruncate
+    missingok
+    notifempty
+}

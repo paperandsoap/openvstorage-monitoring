@@ -1,0 +1,6 @@
+---
+# file: roles/elk/tasks/java.yml
+
+- name: Java apt packages
+  apt: name={{ item }} update_cache=yes state=present
+  with_items: "{{ elk_java.openjdk }}"

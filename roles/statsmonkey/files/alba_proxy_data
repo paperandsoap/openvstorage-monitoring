@@ -1,0 +1,105 @@
+#!/usr/bin/python
+
+import json
+import socket
+import sys
+import re
+sys.path.append('/opt/OpenvStorage')
+from ovs.extensions.plugins.albacli import AlbaCLI
+from ovs.dal.lists.servicetypelist import ServiceTypeList
+from ovs.dal.hybrids.servicetype import ServiceType
+from ovs.dal.lists.storagerouterlist import StorageRouterList
+
+
+def main():
+    hostname = socket.gethostname()
+    proxies = get_backends_and_proxy_ports(hostname)
+    points = []
+    for vpool in proxies.keys():
+        points.append(get_stats_from_proxy(hostname, vpool, proxies[vpool]))
+    print_stats(points)
+
+def print_stats(stats):
+    print json.dumps(stats)
+
+def get_proxy_backend_name(port):
+    try:
+        output = AlbaCLI.run('proxy-client-cfg -h 127.0.0.1 -p %s' %port)
+    except Exception,ex:
+        print "Could not get proxy client configuration from proxy at 127.0.0.1:%s" %port
+        return None
+
+    regex = 'cluster_id\ \=\ [a-zA-Z0-9\-\_]*'
+    config = re.search(regex, output).group()
+    return config.split(' = ')[1]
+
+def get_backends_and_proxy_ports(hostname):
+    sr = StorageRouterList.get_by_name(hostname)
+    st = ServiceTypeList.get_by_name(ServiceType.SERVICE_TYPES.ALBA_PROXY)
+    proxies = {}
+    for service in st.services:
+        if service.storagerouter_guid == sr.guid:
+            proxies[service.name] = service.ports[0]
+    return proxies
+
+def get_stats_from_proxy(hostname, vpoolname, port):
+    try:
+        output = AlbaCLI.run('proxy-statistics -h 127.0.0.1 -p %s' % port, as_json=True)['ns_stats']
+    except Exception, ex:
+        print "Could not get statistics from proxy at 127.0.0.1:%s" % port
+        return None
+
+    backendname = get_proxy_backend_name(port)
+    newstats = {
+        'measurement': 'proxyperformance',
+        'tags': {
+            'server': hostname,
+            'vpool': vpoolname,
+            'backend': backendname
+        },
+        'fields': {
+            'download_totaltime': 0,
+            'download_number': 0,
+            'download_min': 0.1,
+            'download_max': 0,
+            'upload_totaltime': 0,
+            'upload_number': 0,
+            'upload_min': 0.1,
+            'upload_max': 0,
+            'partial_read_time_totaltime': 0,
+            'partial_read_time_number': 0,
+            'partial_read_time_min': 0.1,
+            'partial_read_time_max': 0,
+            'partial_read_size_totaltime': 0,
+            'partial_read_size_number': 0,
+            'partial_read_size_min': 0.1,
+            'partial_read_size_max': 0,
+            'fragment_cache_hits': 0,
+            'fragment_cache_misses': 0,
+            'manifest_cached': 0,
+            'manifest_from_nsm': 0,
+            'manifest_stale': 0
+        }
+    }
+    for namespace in output:
+        stats = namespace[1]
+        for key in ['download','upload','partial_read_time','partial_read_size']:
+            newstats['fields']['%s_totaltime' %key] += float(stats[key]['avg'])*int(stats[key]['n'])
+            newstats['fields']['%s_number' %key] += stats[key]['n']
+            if newstats['fields']['%s_min' % key] > stats[key]['min'] and stats[key]['min'] != 0:
+                newstats['fields']['%s_min' % key] = stats[key]['min']
+            if newstats['fields']['%s_max' % key] < stats[key]['max']:
+                newstats['fields']['%s_max' % key] = stats[key]['max']
+        newstats['fields']['fragment_cache_hits'] += stats['fragment_cache_hits']
+        newstats['fields']['fragment_cache_misses'] += stats['fragment_cache_misses']
+        newstats['fields']['manifest_cached'] += stats['manifest_cached']
+        newstats['fields']['manifest_from_nsm'] += stats['manifest_from_nsm']
+        newstats['fields']['manifest_stale'] += stats['manifest_stale']
+
+    return newstats
+
+if __name__ == '__main__':
+    main()
+
+
+

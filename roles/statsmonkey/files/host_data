@@ -1,0 +1,76 @@
+#!/usr/bin/python
+
+import json
+import psutil
+import socket
+
+
+def main():
+    points = []
+    stat = {
+        'measurement': 'host_stats',
+        'tags': {
+            'server': socket.gethostname()
+        },
+        'fields': {}
+    }
+    stat['fields'].update(get_cpu())
+    stat['fields'].update(get_memory())
+    stat['fields'].update(get_network())
+    points.append(stat)
+    print json.dumps(points)
+
+
+def get_cpu():
+    try:
+        stat = {'cpu_percent': psutil.cpu_percent(interval=1, percpu=False)}
+        return stat
+    except Exception as ex:
+        pass
+
+
+def get_memory():
+    try:
+        mem = psutil.virtual_memory()
+        swap = psutil.swap_memory()
+
+        stat = {
+            'mem_used': mem.used,
+            'mem_free': mem.free,
+            'mem_free_perc': mem.percent,
+            'swap_used': swap.used,
+            'swap_free': swap.free,
+            'swap_free_perc': swap.percent
+        }
+        return stat
+    except Exception, ex:
+        pass
+
+
+def get_network():
+    try:
+        nics = psutil.net_io_counters(pernic=True)
+
+        nics.pop('lo', None)
+
+        if 'bond0' in nics:
+            nic = nics['bond0']
+        elif 'eth0' in nics:
+            nic = nics['eth0']
+        else:
+            nic = nics.itervalues().next()
+
+        stat = {
+            'bytes_sent': nic.bytes_sent,
+            'bytes_recv': nic.bytes_recv,
+            'packets_sent': nic.packets_sent,
+            'packets_recv': nic.packets_recv,
+            'errin': nic.errin,
+            'errout': nic.errout
+        }
+        return stat
+    except Exception, ex:
+        pass
+
+if __name__ == '__main__':
+    main()

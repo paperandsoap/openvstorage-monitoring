@@ -1,0 +1,7 @@
+---
+# file: group_vars/ops
+
+beaver_conf: beaver_ops.conf.j2
+statsmonkey_group: ops
+statsmonkey_plugins:
+   - host_data

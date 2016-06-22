@@ -1,0 +1,91 @@
+#!/usr/bin/python
+
+import sys
+import os
+import time
+import timeout_decorator
+
+sys.path.append('/opt/OpenvStorage')
+from ovs.dal.lists.backendlist import BackendList
+from ovs.dal.lists.servicelist import ServiceList
+from timeout_decorator.timeout_decorator import TimeoutError
+from ovs.dal.hybrids.servicetype import ServiceType
+from ovs.dal.lists.albanodelist import AlbaNodeList
+from ovs.dal.lists.albabackendlist import AlbaBackendList
+from ovs.extensions.plugins.albacli import AlbaCLI
+
+os.environ["OVS_LOGTYPE_OVERRIDE"] = 'file'
+print '<<<backend>>>'
+
+
+@timeout_decorator.timeout(10)
+def print_backend_size():
+    start_script = time.time()
+    backends = [backend for backend in BackendList.get_backends()]
+
+    try:
+        for backend in backends:
+            start_time = time.time()
+            name = backend.name
+            stats = backend.alba_backend.ns_statistics
+            print 'backend_size_' + name, name, stats['global']['used'], stats['global']['size'], (time.time() - start_time)
+    except TimeoutError:
+        for backend in backends:
+            print 'backend_size_' + backend.name, backend.name, -100, -100, (time.time() - start_script)
+
+
+@timeout_decorator.timeout(10)
+def print_asd_status():
+    start_script = time.time()
+    abl = AlbaBackendList.get_albabackends()
+
+    try:
+        abms = []
+        abs = []
+        for service in ServiceList.get_services():
+            if service.type.name == ServiceType.SERVICE_TYPES.ALBA_MGR:
+                abms.append(service.name)
+
+        for ab in AlbaNodeList.get_albanodes():
+            abs.append(ab.node_id)
+
+        abms = list(set(abms))
+
+        config = "etcd://127.0.0.1:2379/ovs/arakoon/{}/config".format(abms[0])
+        decommissioning_osds = AlbaCLI.run('list-decommissioning-osds', config=config, to_json=True)
+
+        filtered_osds = []
+
+        for ab in abs:
+            filtered_osds += [osd for osd in decommissioning_osds if osd['node_id'] == ab]
+
+        for ab in abl:
+            start_time = time.time()
+            stat_asd = {
+                'decommissioning': len(filtered_osds),
+                'decommissioned': 0,
+                'claimed': 0,
+                'warning': 0,
+                'failure': 0,
+                'error': 0
+            }
+
+            for disks in ab.local_stack.values():
+                for disk in disks.values():
+                    for asd in disk['asds'].values():
+                        if asd['alba_backend_guid'] == ab.guid:
+                            status = asd['status']
+                            status_detail = asd['status_detail']
+                            if status_detail == 'decommissioned':
+                                status = status_detail
+                            if status not in stat_asd:
+                                stat_asd[status] = 0
+                            stat_asd[status] += 1
+            print "asd_status_" + ab.name, ab.name, stat_asd['claimed'], stat_asd['warning'], stat_asd['failure'], stat_asd['error'], stat_asd['decommissioned'], stat_asd['decommissioning'], (time.time() - start_time)
+    except TimeoutError:
+        for ab in abl:
+            print "asd_status_" + ab.name, ab.name, -100, -100, -100, -100, -100, -100, (time.time() - start_script)
+
+if __name__ == '__main__':
+    print_backend_size()
+    print_asd_status()
