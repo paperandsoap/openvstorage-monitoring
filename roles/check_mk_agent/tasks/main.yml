@@ -51,10 +51,14 @@
   when: (inventory_hostname not in groups['switch']) and (is_installed.rc == 1)
   tags: check_mk_agent
 
+- name: Create cache directory
+  file: path=/usr/lib/check_mk_agent/plugins/600/ state=directory
+  tags: check_mk_agent
+
 - name: Import checks
   copy:
      src=clientside/
-     dest=/usr/lib/check_mk_agent/plugins/
+     dest=/usr/lib/check_mk_agent/plugins/600/
      owner=root
      group=root
      mode=0755
