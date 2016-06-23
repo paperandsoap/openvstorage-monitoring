@@ -28,6 +28,27 @@ class StatsmonkeyScheduledTaskController(object):
     _logger.info('Send data task scheduling started')
 
     @staticmethod
+    @celery.task(name='statsmonkey.sender.push_stats',
+                 schedule=crontab(minute='*', hour='*'))
+    @ensure_single(task_name='statsmonkey.sender.push_stats')
+    def push_stats():
+        stats_key = '/ops/stats'
+        if not EtcdConfiguration.exists(stats_key):
+            StatsmonkeyScheduledTaskController._logger.error('{} config not found'.format(stats_key))
+            return
+
+        stats = EtcdConfiguration.get(stats_key).get('statistics')
+        if 'backend' in stats:
+            StatsmonkeyScheduledTaskController().get_backend_sizes()
+            StatsmonkeyScheduledTaskController().get_backend_stats()
+            StatsmonkeyScheduledTaskController().get_disk_safety()
+        if 'vpool' in stats:
+            StatsmonkeyScheduledTaskController().get_vpool_stats()
+        if 'vdisk' in stats:
+            StatsmonkeyScheduledTaskController().get_vdisks_stats()
+
+
+    @staticmethod
     def _send_stats(points):
 
         db_key = '/ops/db'
@@ -77,9 +98,6 @@ class StatsmonkeyScheduledTaskController(object):
         return points
 
     @staticmethod
-    @celery.task(name='statsmonkey.sender.get_backend_sizes',
-                 schedule=crontab(minute='*', hour='*'))
-    @ensure_single(task_name='statsmonkey.sender.get_backend_sizes')
     def get_backend_sizes():
         """
         Send backend sizes to InfluxDB
@@ -113,9 +131,6 @@ class StatsmonkeyScheduledTaskController(object):
         return points
 
     @staticmethod
-    @celery.task(name='statsmonkey.sender.get_vdisks_stats',
-                 schedule=crontab(minute='*', hour='*'))
-    @ensure_single(task_name='statsmonkey.sender.get_vdisks_stats')
     def get_vdisks_stats():
         """
         Send vdisks statistics to InfluxDB
@@ -168,9 +183,6 @@ class StatsmonkeyScheduledTaskController(object):
                 StatsmonkeyScheduledTaskController._logger.error(ex.message)
 
     @staticmethod
-    @celery.task(name='statsmonkey.sender.get_backend_stats',
-                 schedule=crontab(minute='*', hour='*'))
-    @ensure_single(task_name='statsmonkey.sender.get_backend_stats')
     def get_backend_stats():
         """
         Send backend stats for each backend to InfluxDB
@@ -189,7 +201,7 @@ class StatsmonkeyScheduledTaskController(object):
         abms = list(set(abms))
 
         config = "etcd://127.0.0.1:2379/ovs/arakoon/{}/config".format(abms[0])
-        decommissioning_osds = AlbaCLI.run('list-decommissioning-osds', config=config, as_json=True)
+        decommissioning_osds = AlbaCLI.run('list-decommissioning-osds', config=config, to_json=True)
 
         filtered_osds = []
 
@@ -219,7 +231,7 @@ class StatsmonkeyScheduledTaskController(object):
                     'error': 0
                 }
 
-                for disks in ab.storage_stack.values():
+                for disks in ab.local_stack.values():
                     for disk in disks.values():
                         for asd in disk['asds'].values():
                             if asd['alba_backend_guid'] == ab.guid:
@@ -245,9 +257,6 @@ class StatsmonkeyScheduledTaskController(object):
         return points
 
     @staticmethod
-    @celery.task(name='statsmonkey.sender.get_disk_safety',
-                 schedule=crontab(minute='*', hour='*'))
-    @ensure_single(task_name='statsmonkey.sender.get_disk_safety')
     def get_disk_safety():
         """
         Send disk safety for each vpool and the amount of namespaces with the lowest disk safety
@@ -267,7 +276,7 @@ class StatsmonkeyScheduledTaskController(object):
                 continue
 
             config = "etcd://127.0.0.1:2379/ovs/arakoon/{}/config".format(service_name)
-            disk_safety = AlbaCLI.run('get-disk-safety', config=config, as_json=True)
+            disk_safety = AlbaCLI.run('get-disk-safety', config=config, to_json=True)
 
             presets = ab.presets
             used_preset = None
@@ -324,9 +333,6 @@ class StatsmonkeyScheduledTaskController(object):
         return points
 
     @staticmethod
-    @celery.task(name='statsmonkey.sender.get_vpool_stats',
-                 schedule=crontab(minute='*', hour='*'))
-    @ensure_single(task_name='statsmonkey.sender.get_vpool_stats')
     def get_vpool_stats():
         """
         Send Vpool statistics to InfluxDB

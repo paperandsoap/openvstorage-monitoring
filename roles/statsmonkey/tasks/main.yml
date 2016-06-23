@@ -53,8 +53,13 @@
   with_items: "{{ statsmonkey_plugins }}"
   tags: statsmonkey
 
-- name: Import etcd influxdb config
+- name: Import etcd db config
   shell: "etcdctl set /ops/db '{\"transport\": \"{{ transport }}\", \"host\": \"{{ host }}\",\"port\": {{ port }}, \"username\": \"{{ user }}\", \"password\": \"{{ password }}\", \"database\": \"{{ database }}\"}'"
+  when: inventory_hostname in groups['controllers'] or inventory_hostname in groups['computenodes'] or inventory_hostname in groups['hyperconverged'] or inventory_hostname in groups['volumedrivernodes']
+  tags: statsmonkey
+
+- name: Import etcd statistics config
+  shell: "etcdctl set /ops/stats '{ \"statistics\": {{ statistics }} }'"
   when: inventory_hostname in groups['controllers'] or inventory_hostname in groups['computenodes'] or inventory_hostname in groups['hyperconverged'] or inventory_hostname in groups['volumedrivernodes']
   tags: statsmonkey
 

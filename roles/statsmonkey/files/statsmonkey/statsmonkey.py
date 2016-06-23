@@ -1,5 +1,6 @@
 #!/usr/bin/python
 
+import sys
 import argparse
 import ConfigParser
 import subprocess
@@ -19,7 +20,6 @@ class Statsmonkey():
 
     def __init__(self, config_file):
         self.config_file = config_file
-        self.config = self._read_config_file()
         self.config = self._read_config_file()
 
     def run_plugins(self):
@@ -102,19 +102,38 @@ class Statsmonkey():
         """
         :return: Returns a list of files
         """
+        etcd = False
+        stats = []
+
+        try:
+            stats_key = '/ops/stats'
+            if not EtcdConfiguration.exists(stats_key):
+                self._print_message('{0} config not found'.format(stats_key))
+
+            stats = EtcdConfiguration.get(stats_key).get('statistics')
+            etcd = True
+        except Exception:
+            pass
+
         files = []
         plugin_path = self.config['plugins']
         if not isdir(plugin_path):
             self._print_message(plugin_path, "does not exists.")
-            exit(2)
+            sys.exit(2)
         if len([name for name in listdir(plugin_path) if isfile(join(plugin_path, name))]) == 0:
             self._print_message(plugin_path, "does not contains plugins.")
-            exit(2)
+            sys.exit(2)
 
         for dirPath, _, fileNames in walk(plugin_path):
             for f in fileNames:
                 if isfile(join(dirPath, f)):
                     files.append(abspath(join(dirPath, f)))
+
+        if etcd:
+            if 'host' not in stats:
+                files.remove('host')
+            if 'alba_proxy' not in stats:
+                files.remove('alba_proxy')
 
         return files
 

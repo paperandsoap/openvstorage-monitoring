@@ -3,4 +3,4 @@
 
 statsmonkey_group: elk
 statsmonkey_plugins:
-   - host_data
+   - host

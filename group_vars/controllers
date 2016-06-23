@@ -4,4 +4,4 @@
 beaver_conf: beaver_ctl.conf.j2
 statsmonkey_group: ctl
 statsmonkey_plugins:
-   - host_data
+   - host

@@ -4,5 +4,5 @@
 beaver_conf: beaver_cmp.conf.j2
 statsmonkey_group: cmp
 statsmonkey_plugins:
-   - host_data
-   - alba_proxy_data
+   - host
+   - alba_proxy

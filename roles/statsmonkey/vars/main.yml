@@ -14,3 +14,4 @@ password: <influxdb_password>
 #database: <db_name>
 #password: <redis_password>
 plugins: /etc/statsmonkey/plugins
+statistics: ["backend", "vpool", "vdisk", "alba_proxy", "host"]

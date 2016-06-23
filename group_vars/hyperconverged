@@ -4,5 +4,5 @@
 beaver_conf: beaver_hyperconverged.conf.j2
 statsmonkey_group: hyperconverged
 statsmonkey_plugins:
-   - host_data
-   - alba_proxy_data
+   - host
+   - alba
