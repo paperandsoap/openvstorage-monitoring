@@ -1,2 +1,9 @@
 ProxyPass / http://127.0.0.1:{{ elk_kibana.port}}/
 ProxyPassReverse / http://127.0.0.1:{{ elk_kibana.port}}/
+
+<Location "/app/kibana">
+        AuthType Basic
+        AuthName "Restricted Kibana"
+        AuthUserFile /etc/apache2/htpasswd
+        Require valid-user
+</Location>

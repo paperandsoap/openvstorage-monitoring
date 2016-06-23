@@ -21,6 +21,8 @@ elk_logstash:
     - { src: ovs-pattern.j2, dest: ovs}
 
 elk_kibana:
+  user: <username>
+  password: <password>
   version: 4.4
   path: /opt/kibana
   port: 5601
