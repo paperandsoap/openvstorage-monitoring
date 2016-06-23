@@ -1,8 +1,11 @@
 ---
 # file: roles/health_check/tasks/main.yml
 
-- name: Install python-pip
-  apt: name=python-pip state=latest update_cache=yes
+- name: Install apt packages
+  apt: name={{ item }} state=latest update_cache=yes
+  with_items:
+     - python-pip
+     - git
   tags: health_check
 
 - name: Install pip packages
