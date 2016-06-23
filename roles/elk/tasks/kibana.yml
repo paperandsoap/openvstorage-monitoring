@@ -20,6 +20,14 @@
      group=root
      mode=0644
 
+- name: Create htpasswd file
+  shell: 'echo "{{ elk_kibana.user }}:$(openssl passwd -crypt {{ elk_kibana.password }}):kibana" |tee htpasswd'
+  args:
+    chdir: /etc/apache2
+    creates: /etc/apache2/htpasswd
+  register: http_pass_gen
+  when: elk_kibana.user is defined and elk_kibana.password is defined
+
 - name: Copy Apache config file
   template:
      src=010_kibana.j2
