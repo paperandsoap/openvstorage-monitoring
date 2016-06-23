@@ -1,6 +1,8 @@
 ---
 # file: roles/grafana/vars/main.yml
 
+admin_user: "admin"
+admin_password: "admin"
 db_name: "statistics"
 db_user: "grafana"
 db_password: "grafana"
