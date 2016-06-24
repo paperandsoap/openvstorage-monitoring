@@ -123,7 +123,7 @@ class StatsmonkeyScheduledTaskController(object):
         vdisks = VDiskList.get_vdisks()
         if len(vdisks) == 0:
             StatsmonkeyScheduledTaskController._logger.info("No vdisks found")
-            return
+            return None
 
         for vdisk in vdisks:
             try:
@@ -164,8 +164,11 @@ class StatsmonkeyScheduledTaskController(object):
                 }
                 points.append(entry)
                 StatsmonkeyScheduledTaskController._send_stats(points)
+                return points
             except Exception as ex:
                 StatsmonkeyScheduledTaskController._logger.error(ex.message)
+                return None
+            return None
 
     @staticmethod
     @celery.task(name='statsmonkey.sender.get_backend_stats',
@@ -189,7 +192,7 @@ class StatsmonkeyScheduledTaskController(object):
         abms = list(set(abms))
 
         config = "etcd://127.0.0.1:2379/ovs/arakoon/{}/config".format(abms[0])
-        decommissioning_osds = AlbaCLI.run('list-decommissioning-osds', config=config, as_json=True)
+        decommissioning_osds = AlbaCLI.run('list-decommissioning-osds', config=config, to_json=True)
 
         filtered_osds = []
 
@@ -239,7 +242,7 @@ class StatsmonkeyScheduledTaskController(object):
 
         if len(points) == 0:
             StatsmonkeyScheduledTaskController._logger.info("No statistics found")
-            return
+            return None
 
         StatsmonkeyScheduledTaskController._send_stats(points)
         return points
@@ -267,7 +270,7 @@ class StatsmonkeyScheduledTaskController(object):
                 continue
 
             config = "etcd://127.0.0.1:2379/ovs/arakoon/{}/config".format(service_name)
-            disk_safety = AlbaCLI.run('get-disk-safety', config=config, as_json=True)
+            disk_safety = AlbaCLI.run('get-disk-safety', config=config, to_json=True)
 
             presets = ab.presets
             used_preset = None

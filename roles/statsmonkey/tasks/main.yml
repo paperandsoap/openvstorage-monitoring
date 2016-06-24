@@ -55,7 +55,7 @@
 
 - name: Import etcd influxdb config
   shell: "etcdctl set /ops/db '{\"transport\": \"{{ transport }}\", \"host\": \"{{ host }}\",\"port\": {{ port }}, \"username\": \"{{ user }}\", \"password\": \"{{ password }}\", \"database\": \"{{ database }}\"}'"
-  when: inventory_hostname in groups['controllers'] or inventory_hostname in groups['computenodes'] or inventory_hostname in groups['hyperconverged'] or inventory_hostname in groups['volumedrivernodes']
+  when: inventory_hostname in groups['controllers'] or inventory_hostname in groups['hyperconverged']
   tags: statsmonkey
 
 - name: Check if ovs lib exists
