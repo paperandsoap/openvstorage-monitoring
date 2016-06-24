@@ -192,7 +192,11 @@ class StatsmonkeyScheduledTaskController(object):
         abms = list(set(abms))
 
         config = "etcd://127.0.0.1:2379/ovs/arakoon/{}/config".format(abms[0])
-        decommissioning_osds = AlbaCLI.run('list-decommissioning-osds', config=config, to_json=True)
+        try:
+            decommissioning_osds = AlbaCLI.run('list-decommissioning-osds', config=config, to_json=True)
+        except Exception as ex:
+            StatsmonkeyScheduledTaskController._logger.error('{0}'.format(ex.message))
+            return None
 
         filtered_osds = []
 
@@ -270,7 +274,12 @@ class StatsmonkeyScheduledTaskController(object):
                 continue
 
             config = "etcd://127.0.0.1:2379/ovs/arakoon/{}/config".format(service_name)
-            disk_safety = AlbaCLI.run('get-disk-safety', config=config, to_json=True)
+
+            try:
+                disk_safety = AlbaCLI.run('get-disk-safety', config=config, to_json=True)
+            except Exception as ex:
+                StatsmonkeyScheduledTaskController._logger.error('{0}: {1}'.format(service_name, ex.message))
+                continue
 
             presets = ab.presets
             used_preset = None
