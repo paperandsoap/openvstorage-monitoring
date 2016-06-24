@@ -222,7 +222,7 @@ class StatsmonkeyScheduledTaskController(object):
                     'error': 0
                 }
 
-                for disks in ab.storage_stack.values():
+                for disks in ab.local_stack.values():
                     for disk in disks.values():
                         for asd in disk['asds'].values():
                             if asd['alba_backend_guid'] == ab.guid:
